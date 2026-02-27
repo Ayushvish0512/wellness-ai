@@ -1,37 +1,39 @@
 import os
+import urllib.request
 from llama_cpp import Llama
-from huggingface_hub import hf_hub_download
 
 # This is where your code is running
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# 1. Look for the model file you already have in backend/models/
-LOCAL_FILENAME = "smollm-360m-instruct-q4_k_m.gguf"
-LOCAL_PATH = os.path.join(BASE_DIR, "models", LOCAL_FILENAME)
+# 📁 Where the model should live
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+MODEL_PATH = os.path.join(MODEL_DIR, "smollm-360m-instruct-q4_k_m.gguf")
 
-if os.path.exists(LOCAL_PATH):
-    print(f"✅ Found local model: {LOCAL_PATH}")
-    MODEL_PATH = LOCAL_PATH
-else:
-    # 2. If it's NOT there (like on Render), download it automatically
-    print("☁️ Model not found on server. Downloading from Hugging Face...")
+# 🌍 The Direct Download Link (Public)
+URL = "https://huggingface.co/cakeisalie/SmolLM-360M-Instruct-GGUF/resolve/main/smollm-360m-instruct-q4_k_m.gguf"
+
+# 🛠 1. Check if model exists locally
+if not os.path.exists(MODEL_PATH):
+    print(f"☁️ Model not found. Downloading from public mirror...")
+    os.makedirs(MODEL_DIR, exist_ok=True)
     try:
-        MODEL_PATH = hf_hub_download(
-            repo_id="cakeisalie/SmolLM-360M-Instruct-GGUF",
-            filename="smollm-360m-instruct-q4_k_m.gguf",
-            local_dir=os.path.dirname(LOCAL_PATH)
-        )
+        # Download the file directly
+        urllib.request.urlretrieve(URL, MODEL_PATH)
+        print("✅ Download Complete!")
     except Exception as e:
-        print(f"❌ Error downloading model: {e}")
+        print(f"❌ Download Failed: {e}")
         raise e
+else:
+    print(f"✅ Using existing model at: {MODEL_PATH}")
 
-# 3. Load the model into the AI engine
+# 🚀 2. Start the AI Engine
 llm = Llama(
     model_path=MODEL_PATH,
     n_ctx=1024,
     n_threads=4,
     n_batch=128
 )
+
 
 
 
