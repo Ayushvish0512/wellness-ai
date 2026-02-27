@@ -26,13 +26,11 @@ def health():
 #-------- CORS Middleware --------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=False, # Wildcard origins do not allow credentials
+    allow_origins=["*"],
+    allow_credentials=False, # Must be False for wildcard origins
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 
 # -------- Chat Endpoint --------
 @app.post("/chat")
@@ -50,25 +48,17 @@ def chat(request: ChatRequest):
 
     # 🔹 Step 2: Check if user is asking for their last message
     last_message_keywords = [
-        "last message", "last msg", "last question", "what was my last message",
-        "what's my last question", "whats my last msg"
+        "what was my last message", "what did i just ask", 
+        "repeat my last question", "what was my previous message",
+        "last message", "last msg"
     ]
-
-    asking_last_message = any(k in request.message.lower() for k in last_message_keywords)
-
-    last_user_message = None
-    if asking_last_message:
-        # Exclude the current message (ask about last) from search
-        for msg in reversed(history):
-            if msg["role"] == "user" and msg["content"].strip().lower() != request.message.strip().lower():
-                last_user_message = msg["content"]
-                break
-
-        ai_response = (
-            f"Your last message was: '{last_user_message}'"
-            if last_user_message else
-            "You have no previous messages."
-        )
+    
+    if any(keyword in request.message.lower() for keyword in last_message_keywords):
+        user_messages = [msg for msg in history if msg["role"] == "user"]
+        if user_messages:
+            ai_response = f"Your last message was: '{user_messages[-1]['content']}'"
+        else:
+            ai_response = "I don't see any previous messages from you in this session."
     else:
         # 🔹 Step 3: Generate AI response normally
         ai_response = generate_response(
