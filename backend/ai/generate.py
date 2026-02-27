@@ -1,4 +1,4 @@
-from ai.model import llm
+from backend.ai.model import llm
 from typing import List, Dict, Optional
 
 
