@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from backend.ai.generate import generate_response
-from db.chat_store import save_message, get_history
+from backend.db.chat_store import save_message, get_history
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
