@@ -23,14 +23,15 @@ def home():
 def health():
     return {"status": "ok"}
 
-#-------- CORS Middleware --------for development (allow all origins, later restrict to frontend domain) --------
+#-------- CORS Middleware --------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later restrict to your frontend domain
-    allow_credentials=True,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=False, # Wildcard origins do not allow credentials
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # -------- Chat Endpoint --------
