@@ -36,9 +36,16 @@ app.add_middleware(
 # -------- Chat Endpoint --------
 @app.post("/chat")
 def chat(request: ChatRequest):
+    print(f"📥 Received request from user: {request.user_id}")
+    print(f"💬 Message: {request.message}")
+    
     # 🔹 Step 1: Load conversation history from DB
-    history = get_history(request.user_id)
-    print("LOADED HISTORY:", history)
+    try:
+        history = get_history(request.user_id)
+        print(f"📚 Loaded history: {len(history)} messages")
+    except Exception as e:
+        print(f"❌ Error loading history: {e}")
+        history = []
 
     # 🔹 Step 2: Check if user is asking for their last message
     last_message_keywords = [
@@ -68,10 +75,14 @@ def chat(request: ChatRequest):
             lifestyle_area=request.lifestyle_area,
             history=history
         )
+    
+    print(f"🤖 AI Response generated ({len(ai_response)} chars)")
 
     # 🔹 Step 4: Save current messages to DB
     save_message(request.user_id, "user", request.message)
     save_message(request.user_id, "assistant", ai_response)
+    
+    print(f"✅ Saved to DB. Sending response...")
 
     return {
         "user_id": request.user_id,
