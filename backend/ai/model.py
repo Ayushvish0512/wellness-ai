@@ -33,10 +33,11 @@ else:
 # 🚀 2. Start the AI Engine
 llm = Llama(
     model_path=MODEL_PATH,
-    n_ctx=512,      
-    n_threads=2,    # Increased from 1 to 2
-    n_batch=128
+    n_ctx=256,       # Very small context to save RAM
+    n_threads=1,     # Single thread to keep CPU usage low
+    n_batch=32       # Small batch size to avoid spikes
 )
+
 
 
 
