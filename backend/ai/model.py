@@ -1,5 +1,5 @@
 import os
-from llama_cpp import Llama
+from ctransformers import AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
 
 # Base directory for the backend
@@ -31,11 +31,11 @@ else:
 
 print(f"Loading model from: {MODEL_PATH}")
 
-llm = Llama(
-    model_path=MODEL_PATH,
-    n_ctx=1024,
-    n_threads=4,
-    n_batch=128
+llm = AutoModelForCausalLM.from_pretrained(
+    MODEL_PATH,
+    model_type="llama",
+    context_length=1024,
+    threads=4
 )
 
 

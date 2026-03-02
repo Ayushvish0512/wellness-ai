@@ -46,11 +46,31 @@ Lifestyle focus: {lifestyle_area or "general wellness"}
         "content": message
     })
 
+    # -------- Build the prompt in Llama format --------
+    prompt = ""
+    for msg in messages:
+        if msg["role"] == "system":
+            prompt += f"<|system|>\n{msg['content']}\n"
+        elif msg["role"] == "user":
+            prompt += f"<|user|>\n{msg['content']}\n"
+        elif msg["role"] == "assistant":
+            prompt += f"<|assistant|>\n{msg['content']}\n"
+    
+    prompt += "<|assistant|>\n"
+
     # -------- Generate Response --------
-    output = llm.create_chat_completion(
-        messages=messages,
-        max_tokens=150,
+    output = llm(
+        prompt,
+        max_new_tokens=150,
         temperature=0.7,
+        stop=["<|user|>", "<|system|>"]
     )
 
-    return output["choices"][0]["message"]["content"].strip()
+    # Extract the generated text
+    generated_text = output.strip()
+    
+    # Remove the prompt from the response if it appears
+    if generated_text.startswith(prompt):
+        generated_text = generated_text[len(prompt):].strip()
+    
+    return generated_text
