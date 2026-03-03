@@ -1,41 +1,46 @@
 import os
-from ctransformers import AutoModelForCausalLM
+from llama_cpp import Llama
 from huggingface_hub import hf_hub_download
 
-# Base directory for the backend
+# This is where your code is running
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Define model details (using a verified public repo)
-REPO_ID = "bartowski/SmolLM-360M-Instruct-GGUF"
-FILENAME = "SmolLM-360M-Instruct-Q4_K_M.gguf"
-OLD_FILENAME = "smollm-360m-instruct-q4_k_m.gguf"
+# 📁 Where the model should live
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+MODEL_PATH = os.path.join(MODEL_DIR, "SmolLM2-360M-Instruct-Q4_K_M.gguf")
 
-# Local path inside the project
-LOCAL_MODEL_PATH = os.path.join(BASE_DIR, "models", FILENAME)
-OLD_LOCAL_PATH = os.path.join(BASE_DIR, "models", OLD_FILENAME)
+# 🌍 The Direct Download Link (Public SmolLM2)
+URL = "https://huggingface.co/bartowski/SmolLM2-360M-Instruct-GGUF/resolve/main/SmolLM2-360M-Instruct-Q4_K_M.gguf?download=true"
 
-# Check if model exists locally (new or old name), otherwise download it
-if os.path.exists(LOCAL_MODEL_PATH):
-    MODEL_PATH = LOCAL_MODEL_PATH
-elif os.path.exists(OLD_LOCAL_PATH):
-    MODEL_PATH = OLD_LOCAL_PATH
+# 🛠 1. Check if model exists locally
+if not os.path.exists(MODEL_PATH):
+    print(f"☁️ Model not found. Downloading SmolLM2 from public mirror...")
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    try:
+        # We add a User-Agent because some servers block basic urllib requests with a 401
+        req = urllib.request.Request(URL, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response, open(MODEL_PATH, 'wb') as out_file:
+            data = response.read()
+            out_file.write(data)
+        print("✅ Download Complete!")
+    except Exception as e:
+        print(f"❌ Download Failed: {e}")
+        # If it fails, we try a secondary mirror or just fail gracefully
+        raise e
 else:
-    print(f"Model not found. Downloading {FILENAME} from Hugging Face...")
-    os.makedirs(os.path.dirname(LOCAL_MODEL_PATH), exist_ok=True)
-    MODEL_PATH = hf_hub_download(
-        repo_id=REPO_ID, 
-        filename=FILENAME, 
-        local_dir=os.path.dirname(LOCAL_MODEL_PATH)
-    )
+    print(f"✅ Using existing model at: {MODEL_PATH}")
 
-
-print(f"Loading model from: {MODEL_PATH}")
-
-llm = AutoModelForCausalLM.from_pretrained(
-    MODEL_PATH,
-    model_type="llama",
-    context_length=1024,
-    threads=4
+llm = Llama(
+    model_path=MODEL_PATH,
+    n_ctx=1024,
+    n_threads=4,
+    n_batch=128
 )
+
+
+
+
+
+
 
 

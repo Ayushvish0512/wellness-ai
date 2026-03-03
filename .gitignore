@@ -213,6 +213,7 @@ __marimo__/
 
 # AI models & embeddings
 models/
+
 vectorstore/
 faiss_index/
 

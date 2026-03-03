@@ -1,13 +1,11 @@
 from backend.ai.model import llm
 from typing import List, Dict, Optional
 
-
 def generate_response(
     message: str,
     lifestyle_area: Optional[str] = None,
     history: Optional[List[Dict[str, str]]] = None,
 ):
-
     # -------- System Behavior Control --------
     system_prompt = f"""
 You are a professional wellness coach.
